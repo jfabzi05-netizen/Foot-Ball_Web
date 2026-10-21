@@ -1,0 +1,54 @@
+﻿@* Components/Layout/TorneoCard.razor *@
+@inject NavigationManager NavigationManager
+
+@if (Torneo != null)
+{
+    <div class="torneo-banner-card" style="--brand-color: @(string.IsNullOrWhiteSpace(Torneo.ColorHex) ? "#E63946" : Torneo.ColorHex);">
+        <!-- Imagen de fondo recortada a 4:1 -->
+        <img class="torneo-card-bg"
+             src="@(string.IsNullOrWhiteSpace(Torneo.UrlBackground) ? "/public/default-bg.png" : Torneo.UrlBackground)"
+             alt="@Torneo.Nombre" />
+
+        <!-- Overlay oscuro -->
+        <div class="torneo-card-overlay"></div>
+
+        <!-- Contenido posicionado en la esquina inferior derecha -->
+        <div class="torneo-card-content">
+            <div class="torneo-actions-group">
+                @if (!string.IsNullOrWhiteSpace(Torneo.UrlImagenLogo))
+                {
+                    <div class="torneo-logo-container">
+                        <img class="torneo-logo" src="@Torneo.UrlImagenLogo" alt="Logo @Torneo.Nombre" />
+                    </div>
+                }
+
+                <button class="btn-ver-detalles" @onclick="NavegarAlDetalle">
+                    Ver Detalles
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Torneo? Torneo { get; set; }
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    private async Task NavegarAlDetalle()
+    {
+        if (Torneo != null && !string.IsNullOrWhiteSpace(Torneo.Id))
+        {
+            if (OnClick.HasDelegate)
+            {
+                await OnClick.InvokeAsync();
+            }
+            else
+            {
+                NavigationManager.NavigateTo($"/torneos/{Torneo.Id}");
+            }
+        }
+    }
+}

@@ -1,0 +1,41 @@
+﻿@* Components/Pages/Internacionales.razor *@
+@page "/internacionales"
+@rendermode InteractiveServer
+
+<div class="torneos-page-container">
+    <main class="torneos-content">
+        @if (torneos == null)
+        {
+            <div class="loading-state">
+                <p>Cargando torneos...</p>
+            </div>
+        }
+        else if (!torneos.Any())
+        {
+            <div class="empty-state">
+                <p>No hay torneos registrados actualmente.</p>
+            </div>
+        }
+        else
+        {
+            <div class="torneos-stack-list">
+                @foreach (var torneo in torneos)
+                {
+                    <TorneoCard Torneo="torneo" />
+                }
+            </div>
+        }
+    </main>
+</div>
+
+@code {
+    private List<Torneo>? torneos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Obtiene la lista de torneos desde tu servicio de dominio
+        List<Torneo>? lista = await DomainService.ObtenerTorneosAsync();
+        torneos = lista.Where(t => t.TipoTorneo == Models.Enums.TipoTorneo.Internacional)
+        .ToList();
+    }
+}

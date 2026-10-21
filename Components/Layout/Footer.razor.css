@@ -1,0 +1,94 @@
+﻿.sponsors {
+    align-self: stretch;
+    height: auto !important;
+    background-color: #000;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* 1. Mismo padding/espacio arriba y abajo del bloque negro (ejemplo: 50px) */
+    padding: 50px 40px;
+    box-sizing: border-box;
+    /* 2. Controlamos las distancias internas entre elementos con gap */
+    gap: 30px;
+    text-align: center;
+    font-size: 15px;
+    color: #fff;
+    font-family: Inter, sans-serif;
+}
+
+.fifa-1-icon {
+    width: 91px;
+    height: auto;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* Quitamos los margin-top que descompensaban la distancia superior e inferior */
+.text {
+    align-self: stretch;
+    line-height: 145%;
+    font-weight: 500;
+    margin-top: 0;
+}
+
+.logos {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 28px;
+    margin-top: 0;
+    gap: 60px; /* Separación horizontal entre marcas */
+}
+
+.adidas-2-icon, .coca-cola-2, .lenovo-1-icon, .qatar-1-icon {
+    width: 75px;
+    height: auto;
+    object-fit: cover;
+}
+
+.coca-cola-2 {
+    width: 102px;
+}
+
+.lenovo-1-icon {
+    width: 115px;
+}
+
+.qatar-1-icon {
+    width: 97px;
+}
+
+.mcdonalds-logo-copy-1-icon {
+    height: 50px;
+    width: 55px;
+    object-fit: cover;
+}
+
+.text2 {
+    align-self: stretch;
+    position: relative;
+    font-size: 12px;
+    line-height: 145%;
+    font-weight: 500;
+    color: #fff;
+    margin-top: 0; /* Sin margin-top extra para mantener la simetría */
+}
+
+/* --- MEDIA QUERIES (Ajustes para pantallas pequeñas) --- */
+
+@media screen and (max-width: 925px) {
+    .logos {
+        flex-wrap: wrap;
+        gap: 20px 24px;
+    }
+}
+
+@media screen and (max-width: 700px) {
+    .sponsors {
+        padding: 35px 24px; /* Mantiene simetría superior/inferior en celulares */
+        gap: 20px;
+    }
+}

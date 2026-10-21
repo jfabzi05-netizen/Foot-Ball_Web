@@ -1,0 +1,257 @@
+﻿@using ProyectoWebFutbol.Models.Dominio
+
+@if (Entradas != null && Entradas.Any())
+{
+    <div class="tabla-posiciones-card">
+        <div class="tabla-responsive">
+            <table class="tabla-posiciones">
+                <thead>
+                    <tr>
+                        <th class="col-pos">#</th>
+                        <th class="col-equipo">Equipo</th>
+                        <th class="col-stat">PJ</th>
+                        <th class="col-stat">PG</th>
+                        <th class="col-stat">PE</th>
+                        <th class="col-stat">PP</th>
+                        <th class="col-stat">GF</th>
+                        <th class="col-stat">GC</th>
+                        <th class="col-stat">+/-</th>
+                        <th class="col-stat col-puntos">PTS</th>
+                        <th class="col-form">Forma</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entrada in Entradas.OrderBy(e => e.Puesto))
+                    {
+                        <tr>
+                            <td class="col-pos">@entrada.Puesto</td>
+                            <td class="col-equipo">
+                                <div class="equipo-info">
+                                    @if (entrada.Equipo != null)
+                                    {
+                                        <img src="@entrada.Equipo.UrlImagen"
+                                             alt="@entrada.Equipo.Nombre"
+                                             class="team-flag"
+                                             loading="lazy" />
+                                        <span class="team-name">@entrada.Equipo.Nombre</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="team-name">Por definir</span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="col-stat">@entrada.Jugados</td>
+                            <td class="col-stat">@entrada.Victorias</td>
+                            <td class="col-stat">@entrada.Empates</td>
+                            <td class="col-stat">@entrada.Derrotas</td>
+                            <td class="col-stat">@entrada.GolesFavor</td>
+                            <td class="col-stat">@entrada.GolesContra</td>
+                            <td class="col-stat">
+                                @(entrada.DiferenciaGoles > 0 ? $"+{entrada.DiferenciaGoles}" : entrada.DiferenciaGoles)
+                            </td>
+                            <td class="col-stat col-puntos">@entrada.Puntos</td>
+                            <td class="col-form">
+                                <div class="form-guide-container">
+                                    @if (entrada.UltimosResultados != null)
+                                    {
+                                        @foreach (var resultado in entrada.UltimosResultados)
+                                        {
+                                            <span class="form-badge @ObtenerClaseResultado(resultado)">
+                                                @char.ToUpper(resultado)
+                                            </span>
+                                        }
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="tabla-vacia">
+        <p>No hay posiciones registradas.</p>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public GrupoTorneo Grupo { get; set; } = new();
+
+    private List<EntradaPosicion> Entradas = new();
+    private bool cargando = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Grupo != null && Grupo.Jornadas != null)
+        {
+            cargando = true;
+            try
+            {
+                // Pasa la lista de jornadas del grupo al servicio
+                Entradas = await DomainService.CalcularTablaPosicionesAsync(Grupo.Jornadas);
+            }
+            finally
+            {
+                cargando = false;
+            }
+        }
+    }
+
+    private string ObtenerClaseResultado(char res)
+    {
+        return char.ToUpper(res) switch
+        {
+            'W' => "res-w",
+            'D' => "res-d",
+            'L' => "res-l",
+            _ => ""
+        };
+    }
+}
+
+<style>
+    /* Estilos globales en armonía con .match-card */
+    .tabla-posiciones-card {
+        width: 100%;
+        background-color: #ffffff;
+        border: 1px solid #e2e2e2;
+        border-radius: 20px;
+        padding: 18px 22px;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .tabla-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .tabla-posiciones {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        /* Filas de la tabla */
+        .tabla-posiciones td {
+            padding: 14px 0;
+            font-size: 15px;
+            color: #111111;
+            border-bottom: 1px solid #f2f2f2;
+        }
+
+        .tabla-posiciones tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Encabezados de la tabla */
+        .tabla-posiciones th {
+            font-size: 14px;
+            font-weight: 500;
+            color: #111111;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e5e5;
+            white-space: nowrap;
+        }
+
+    /* Posición numérica (#) */
+    .col-pos {
+        width: 32px;
+        font-weight: 600;
+        color: #444444;
+        text-align: center;
+    }
+
+    /* Equipo (Ocupa todo el espacio sobrante) */
+    .col-equipo {
+        text-align: left !important;
+        width: auto;
+        padding-left: 8px !important;
+    }
+
+    .equipo-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .team-flag {
+        width: 36px;
+        height: 24px;
+        object-fit: contain;
+        border-radius: 2px;
+        background-color: transparent;
+    }
+
+    .team-name {
+        font-size: 15px;
+        font-weight: 500;
+        color: #111111;
+        letter-spacing: -0.2px;
+    }
+
+    /* ESTADÍSTICAS NUMÉRICAS: ANCHO FIJO E IDÉNTICO DE 40px PARA TODAS */
+    .tabla-posiciones th.col-stat,
+    .tabla-posiciones td.col-stat {
+        width: 45px !important;
+        min-width: 40px !important;
+        max-width: 60px !important;
+        font-size: 15px;
+        font-weight: 400;
+        color: #222222;
+        padding: 12px 0 !important;
+        text-align: center !important;
+        white-space: nowrap;
+    }
+
+    /* Puntos */
+    .col-puntos {
+        font-weight: 700 !important;
+        color: #000000 !important;
+    }
+
+    /* Columna Forma */
+    .tabla-posiciones th.col-form,
+    .tabla-posiciones td.col-form {
+        width: 120px;
+        padding-left: 20px !important;
+        text-align: center;
+    }
+
+    .form-guide-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .form-badge {
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1;
+        display: inline-block;
+    }
+
+        .form-badge.res-w {
+            color: #2e7d32; /* Verde Victoria */
+        }
+
+        .form-badge.res-d {
+            color: #757575; /* Gris Empate */
+        }
+
+        .form-badge.res-l {
+            color: #d32f2f; /* Rojo Derrota */
+        }
+
+    .tabla-vacia {
+        padding: 24px;
+        text-align: center;
+        color: #777777;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+</style>

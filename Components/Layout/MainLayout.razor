@@ -1,0 +1,44 @@
+﻿@inherits LayoutComponentBase
+
+<div class="desktop">
+    <NavBar />
+
+    <main class="main-content">
+        @Body
+    </main>
+
+    <Footer />
+</div>
+
+<style>
+    /* 1. Limpiamos cualquier comportamiento extraño del navegador */
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+    }
+
+    /* 2. Tu contenedor principal */
+    .desktop {
+        display: flex;
+        flex-direction: column;
+        /* 👇 LA SOLUCIÓN 👇 */
+        height: 100%; /* Cambiado de min-height a height */
+        overflow-y: auto; /* El scroll ahora lo maneja el layout, no la ventana entera */
+        
+        background-color: #fafafa;
+    }
+
+    .main-content {
+        flex: 1 0 auto; /* Asegura que el contenido crezca pero no colapse */
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 👇 AGREGA ESTE BLOQUE EXACTO EN TU MAINLAYOUT 👇 */
+    footer, .sponsors {
+        flex-shrink: 0 !important; /* Prohíbe al layout encoger el footer */
+        flex-grow: 0 !important; /* Prohíbe al layout estirar el footer */
+        align-self: stretch !important;
+    }
+</style>

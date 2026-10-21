@@ -1,0 +1,76 @@
+﻿@* Components/Layout/PageHeader.razor *@
+
+<section class="subtitle" style="background-color: @(Torneo?.ColorHex ?? "#3911FF");">
+    <div class="subtitle2">
+        
+
+        @if (!string.IsNullOrWhiteSpace(Torneo?.UrlImagenLogo))
+        {
+            <img class="header-logo" src="@Torneo.UrlImagenLogo" alt="Logo @Torneo.Nombre" />
+        }
+        <h1 class="teams2">@(Torneo?.Nombre ?? Title)</h1>
+    </div>
+</section>
+
+<style>
+    .subtitle {
+        width: 100%; /* REEMPLAZADO align-self: stretch por width: 100% */
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 20px 125px;
+        box-sizing: border-box;
+        transition: background-color 0.3s ease;
+    }
+
+    .subtitle2 {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 20px;
+    }
+
+    .teams2 {
+        margin: 0;
+        font-size: 50px;
+        line-height: 105%;
+        font-weight: 800;
+        font-family: Inter, sans-serif;
+        color: #fff;
+    }
+
+    .header-logo {
+        height: 50px;
+        width: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+    }
+
+    @@media screen and (max-width: 768px) {
+        .subtitle {
+            padding: 24px;
+        }
+
+        .subtitle2 {
+            gap: 12px;
+        }
+
+        .teams2 {
+            font-size: 32px;
+        }
+
+        .header-logo {
+            height: 36px;
+        }
+    }
+</style>
+
+@code {
+    [Parameter]
+    public Torneo? Torneo { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = "Torneo";
+}

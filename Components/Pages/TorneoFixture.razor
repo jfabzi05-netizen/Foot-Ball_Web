@@ -1,0 +1,162 @@
+﻿@page "/torneos/{TorneoId}"
+@rendermode InteractiveServer
+@inject IDomainService DomainService
+
+@if (cargando)
+{
+    <div class="state-container">
+        <p>Cargando información del torneo...</p>
+    </div>
+}
+else if (torneo == null)
+{
+    <div class="state-container">
+        <h2>Torneo no encontrado</h2>
+        <p>El torneo no existe o fue eliminado.</p>
+    </div>
+}
+else
+{
+    @* Se le pasa el objeto 'torneo' al componente PageHeader *@
+    <PageHeader Torneo="torneo" />
+
+    <main class="torneo-main-content">
+        <div class="torneo-layout-container">
+            
+            <!-- Panel Lateral de Navegación -->
+            <aside class="nav-sidebar">
+                <TorneoNavegacion Fases="torneo.Fases"
+                                  ColorTorneo="@torneo.ColorHex"
+                                  JornadaSeleccionada="jornadaSeleccionada"
+                                  GrupoSeleccionado="grupoSeleccionado"
+                                  FaseSeleccionada="faseSeleccionada"
+                                  MostrarTabla="mostrarTabla"
+                                  OnJornadaSeleccionada="j => jornadaSeleccionada = j"
+                                  OnGrupoSeleccionado="g => grupoSeleccionado = g"
+                                  OnFaseSeleccionada="f => faseSeleccionada = f"
+                                  OnMostrarTablaChanged="m => mostrarTabla = m" />
+            </aside>
+
+            <!-- Sección de Fixture / Tabla de Posiciones (Derecha) -->
+            <section class="fixture-section">
+                @if (mostrarTabla && grupoSeleccionado != null)
+                {
+                    <h2 class="section-title">Tabla @grupoSeleccionado.Nombre</h2>
+                    <TablaPosiciones Grupo="@grupoSeleccionado" />
+                }
+                else if (jornadaSeleccionada != null)
+                {
+                    <h2 class="section-title">@jornadaSeleccionada.Nombre</h2>
+                    <Fixture Partidos="@jornadaSeleccionada.Partidos" />
+                }
+                else
+                {
+                    <p class="no-jornada-msg">No hay información registrada para mostrar.</p>
+                }
+            </section>
+
+        </div>
+    </main>
+}
+
+<style>
+    .state-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+        font-family: Inter, sans-serif;
+        color: #666;
+    }
+
+    .torneo-main-content {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        background-color: #fafafa;
+        min-height: 500px;
+        padding: 32px 16px;
+        box-sizing: border-box;
+    }
+
+    .torneo-layout-container {
+        width: 100%;
+        max-width: 1200px;
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+    }
+
+    .nav-sidebar {
+        flex: 0 0 260px; /* Ancho fijo para el menú lateral */
+        width: 260px;
+    }
+
+    .fixture-section {
+        flex: 1; /* Ocupa el resto del ancho disponible a la derecha */
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        box-sizing: border-box;
+    }
+
+    .section-title {
+        font-family: Inter, sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: #111;
+        margin-top: 0;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .no-jornada-msg {
+        font-family: Inter, sans-serif;
+        color: #777;
+        font-size: 15px;
+    }
+
+    /* Adaptabilidad Móvil */
+    @@media (max-width: 768px) {
+        .torneo-layout-container {
+            flex-direction: column;
+        }
+
+        .nav-sidebar {
+            width: 100%;
+            flex: 1 1 100%;
+        }
+    }
+</style>
+
+@code {
+    [Parameter] public string TorneoId { get; set; } = string.Empty;
+
+    private Torneo? torneo;
+    private FaseTorneo? faseSeleccionada;
+    private GrupoTorneo? grupoSeleccionado;
+    private JornadaTorneo? jornadaSeleccionada;
+    private bool mostrarTabla = false;
+    private bool cargando = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        cargando = true;
+        try
+        {
+            torneo = await DomainService.ObtenerTorneoPorIdAsync(TorneoId);
+
+            // Seleccionar por defecto la primera fase, grupo y jornada disponibles
+            faseSeleccionada = torneo?.Fases.FirstOrDefault();
+            grupoSeleccionado = faseSeleccionada?.Grupos.FirstOrDefault();
+            jornadaSeleccionada = grupoSeleccionado?.Jornadas.FirstOrDefault();
+            mostrarTabla = false;
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+}

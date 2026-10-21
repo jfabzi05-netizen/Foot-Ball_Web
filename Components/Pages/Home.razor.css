@@ -1,0 +1,106 @@
+﻿/* Contenedor general para asegurar que la página mantenga consistencia */
+.home-container-main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #000; /* Fondo oscuro por si la imagen tarda en cargar */
+}
+
+/* La sección que tiene la foto de Messi de fondo */
+.home-image {
+    align-self: stretch;
+    height: 720px;
+    box-shadow: 0 0 4px #000;
+    flex-shrink: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    
+    background-image: url('/public/Home-Image@3x.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center top; /* Centra la imagen para que no se corte la cara */
+    width: 100%;
+    max-width: 100%;
+}
+
+.top-brands {
+    align-self: stretch;
+    display: flex;
+    justify-content: flex-end; /* Lo empuja a la derecha */
+    padding: 32px 64px 0px; /* Margen superior y lateral alineado con tu diseño */
+    box-sizing: border-box;
+}
+
+.brand-logo {
+    width: 75px; /* Dimensión exacta del logo en tu Figma */
+    height: auto;
+    object-fit: cover;
+    opacity: 0.85; /* Integración estética sutil sobre el fondo */
+}
+
+/* El contenedor interno transparente que le da el "colchón" (padding) al eslogan */
+.frame {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centra el eslogan horizontalmente */
+    padding: 434px 40px 31px; /* Añadimos padding lateral para que no toque los bordes */
+    box-sizing: border-box;
+    background-image: url('/public/Frame@3x.png'); /* Capa de degradado o textura de Figma */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: top;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* El texto del Eslogan con sus fuentes explícitas */
+.the-dream-that {
+    margin: 0;
+    flex: 1;
+    position: relative;
+    text-align: center; /* Asegura que el texto esté centrado si se divide en dos líneas */
+    /* Valores reales de tipografía de tu Figma */
+    font-size: 75px;
+    font-family: "Libre Caslon Display", serif;
+    color: rgba(255, 255, 255, 0.71);
+    line-height: 145%;
+    font-weight: 400;
+    white-space: pre-wrap;
+    display: inline-block;
+    max-width: 100%;
+}
+
+/* --- RESPONSIVO: Control para pantallas de Tablets y Celulares --- */
+
+@media screen and (max-width: 925px) {
+    .the-dream-that {
+        font-size: 55px;
+        line-height: 130%;
+    }
+
+    .home-image {
+        height: 600px; /* Reducimos un poco el alto en tablets */
+    }
+}
+
+@media screen and (max-width: 700px) {
+    .frame {
+        padding-top: 250px;
+        padding-bottom: 20px;
+    }
+}
+
+@media screen and (max-width: 450px) {
+    .the-dream-that {
+        font-size: 36px; /* Letra más pequeña para que quepa en un celular vertical */
+        line-height: 120%;
+    }
+
+    .home-image {
+        height: 500px;
+    }
+}
