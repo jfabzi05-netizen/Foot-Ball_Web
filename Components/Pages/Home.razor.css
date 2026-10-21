@@ -18,7 +18,7 @@
     flex-direction: column;
     justify-content: space-between;
     
-    background-image: url('/public/Home-Image@3x.png');
+    background-image: url('/public/Home.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center top; /* Centra la imagen para que no se corte la cara */
