@@ -8,5 +8,6 @@ namespace ProyectoWebFutbol.Models.DTOs
         public string Nombre { get; set; } = string.Empty;
         public string? ColorHex { get; set;}
         public TipoTorneo TipoTorneo { get; set; } 
+        public int Index { get; set; }
     }
 }

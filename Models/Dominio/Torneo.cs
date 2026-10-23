@@ -11,5 +11,6 @@ namespace ProyectoWebFutbol.Models.Dominio
         public TipoTorneo TipoTorneo { get; set; }
         public string UrlImagenLogo { get; set; } = string.Empty;
         public string UrlBackground { get; set; } = string.Empty;
+        public int Index { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using ProyectoWebFutbol.Data;
 using ProyectoWebFutbol.Models.Dominio;
 using ProyectoWebFutbol.Models.DTOs;
 using ProyectoWebFutbol.Models.Enums;
+using System.ComponentModel;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace ProyectoWebFutbol.Servicios
@@ -25,7 +26,7 @@ namespace ProyectoWebFutbol.Servicios
         {
             using var context = await _dbFactory.CreateDbContextAsync();
             var dtos = await context.Torneo.ToListAsync(); 
-            return dtos.Select(MapearTorneo).OrderBy(t=> t.Nombre).ToList();
+            return dtos.Select(MapearTorneo).OrderBy(t=> t.Index).ToList();
         }
 
         public async Task<Torneo> ObtenerTorneoPorIdAsync(string id)
@@ -80,6 +81,7 @@ namespace ProyectoWebFutbol.Servicios
             torneo.UrlImagenLogo = _storageBaseUrl + "torneos/" + dto.Nombre + ".png";
             torneo.UrlBackground = _storageBaseUrl + "torneos/" + dto.Nombre + "-fondo.png";
             torneo.TipoTorneo = dto.TipoTorneo;
+            torneo.Index = dto.Index;
             return torneo;
         }
 
@@ -185,8 +187,22 @@ namespace ProyectoWebFutbol.Servicios
             if (jornadas == null || !jornadas.Any())
                 return new List<EntradaPosicion>();
 
+            // Crear las entradas para los equipos (Toma dos jornadas de prueba)
+            var equipos = jornadas
+                .Take(3) // Toma los objetos de las 3 primeras jornadas
+                .SelectMany(j => j.Partidos) // Obtiene todos los partidos de esas 3 jornadas
+                .SelectMany(p => new[] { p.MarcadorLocal.Equipo, p.MarcadorVisita.Equipo }) // Obtiene local y visitante
+                .Distinct() // Elimina duplicados
+                .ToList();
+
+
             // Diccionario auxiliar para acumular las estadísticas por equipo
             var tablaDict = new Dictionary<string, EntradaPosicion>();
+
+            foreach (Equipo equipo in equipos)
+            {
+                tablaDict[equipo.Id] = new EntradaPosicion { Equipo = equipo };
+            }
 
             // Obtener todos los partidos de todas las jornadas recibidas
             var partidos = jornadas
@@ -201,13 +217,6 @@ namespace ProyectoWebFutbol.Servicios
                 var visita = partido.MarcadorVisita.Equipo;
 
                 if (local == null || visita == null) continue;
-
-                // Registrar/obtener entrada de la tabla para ambos equipos
-                if (!tablaDict.ContainsKey(local.Id))
-                    tablaDict[local.Id] = new EntradaPosicion { Equipo = local };
-
-                if (!tablaDict.ContainsKey(visita.Id))
-                    tablaDict[visita.Id] = new EntradaPosicion { Equipo = visita };
 
                 var entradaLocal = tablaDict[local.Id];
                 var entradaVisita = tablaDict[visita.Id];
