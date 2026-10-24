@@ -1,0 +1,164 @@
+﻿@if (Mostrar && Partido != null)
+{
+    <div class="modal-overlay" @onclick="Cerrar">
+        <div class="match-detail-card" @onclick:stopPropagation="true">
+
+            <!-- Encabezado con Equipos y Marcador -->
+            <div class="detail-header">
+                <!-- Equipo Local (Rojo) -->
+                <div class="header-team local">
+                    <div class="team-info">
+                        @if (Partido.MarcadorLocal.Equipo != null)
+                        {
+                            <img src="@Partido.MarcadorLocal.Equipo.UrlImagen"
+                                 onerror="this.onerror=null; this.src='public/assets/logo_not_found.png';"
+                                 alt="@Partido.MarcadorLocal.Equipo.Nombre"
+                                 class="team-logo" />
+                            <span class="team-title">@Partido.MarcadorLocal.Equipo.Nombre</span>
+                        }
+                        else
+                        {
+                            <span class="team-title">Local</span>
+                        }
+                    </div>
+                    <span class="score-display">@(Partido.MarcadorLocal.Score ?? 0)</span>
+                </div>
+
+                <!-- Equipo Visitante (Azul) -->
+                <div class="header-team visitante">
+                    <span class="score-display">@(Partido.MarcadorVisita.Score ?? 0)</span>
+                    <div class="team-info">
+                        <span class="team-title">@Partido.MarcadorVisita.Equipo?.Nombre</span>
+                        @if (Partido.MarcadorVisita.Equipo != null)
+                        {
+                            <img src="@Partido.MarcadorVisita.Equipo.UrlImagen"
+                                 onerror="this.onerror=null; this.src='public/assets/logo_not_found.png';"
+                                 alt="@Partido.MarcadorVisita.Equipo.Nombre"
+                                 class="team-logo" />
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cuerpo Principal -->
+            <div class="detail-body">
+                @if (cargando)
+                {
+                    <div style="min-height: auto !important; padding: 10px 0;">
+                        <PantallaCarga Mensaje="Cargando goleadores..." />
+                    </div>
+                    
+                }
+                else if (!esModoEdicion)
+                {
+                    @if (!TieneGolesRegistrados)
+                    {
+                        <!-- Si la lista de goleadores está nula o vacía -->
+                        <div class="modal-loading-wrapper">
+                            <PantallaCarga Mensaje="No hay goleadores registrados para este partido." />
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- MODO VISTA: Solo Texto Plano -->
+                        <div class="goles-grid-view">
+                            <!-- Columna Local -->
+                            <div class="goles-column local-column">
+                                @foreach (var gol in golesLocal)
+                                {
+                                    <div class="gol-text-row local">
+                                        <span class="gol-jugador">@(string.IsNullOrWhiteSpace(gol.Jugador) ? "Jugador sin nombre" : gol.Jugador)</span>
+                                        <span class="gol-minuto">@(string.IsNullOrWhiteSpace(gol.Minuto) ? "" : $"{gol.Minuto}'")</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Columna Central: Imagen de Balón -->
+                            <div class="ball-column">
+                                <img src="public/assets/icono_ball.png"
+                                     alt="Balón"
+                                     class="ball-image" />
+                            </div>
+
+                            <!-- Columna Visitante -->
+                            <div class="goles-column visitante-column">
+                                @foreach (var gol in golesVisita)
+                                {
+                                    <div class="gol-text-row visitante">
+                                        <span class="gol-minuto">@(string.IsNullOrWhiteSpace(gol.Minuto) ? "" : $"{gol.Minuto}'")</span>
+                                        <span class="gol-jugador">@(string.IsNullOrWhiteSpace(gol.Jugador) ? "Jugador sin nombre" : gol.Jugador)</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Botones abajo a la derecha -->
+                    <div class="actions-container">
+                        <button type="button" class="btn-action-main" @onclick="ActivarModoEdicion">
+                            Editar
+                        </button>
+                        <button type="button" class="btn-action-secondary" @onclick="Cerrar">
+                            Cerrar
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <!-- MODO EDICIÓN: Solo Campos Editables -->
+                    <div class="goles-grid-edit">
+                        <!-- Campos Local -->
+                        <div class="goles-column local-column">
+                            @foreach (var gol in golesLocal)
+                            {
+                                <div class="gol-row">
+                                    <input type="text"
+                                           class="input-smooth input-nombre"
+                                           @bind="gol.Jugador"
+                                           @bind:event="oninput"
+                                           placeholder="Jugador local" />
+
+                                    <input type="text"
+                                           class="input-smooth input-minuto"
+                                           @bind="gol.Minuto"
+                                           @bind:event="oninput"
+                                           placeholder="Min." />
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Campos Visitante -->
+                        <div class="goles-column visitante-column">
+                            @foreach (var gol in golesVisita)
+                            {
+                                <div class="gol-row">
+                                    <input type="text"
+                                           class="input-smooth input-nombre"
+                                           @bind="gol.Jugador"
+                                           @bind:event="oninput"
+                                           placeholder="Jugador visitante" />
+
+                                    <input type="text"
+                                           class="input-smooth input-minuto"
+                                           @bind="gol.Minuto"
+                                           @bind:event="oninput"
+                                           placeholder="Min." />
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Botones abajo a la derecha -->
+                    <div class="actions-container">
+                        <button type="button" class="btn-action-main" @onclick="GuardarYVolverAsync">
+                            Guardar
+                        </button>
+                        <button type="button" class="btn-action-secondary" @onclick="Cerrar">
+                            Cerrar
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

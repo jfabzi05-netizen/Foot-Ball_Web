@@ -6,9 +6,7 @@
     <main class="torneos-content">
         @if (torneos == null)
         {
-            <div class="loading-state">
-                <p>Cargando torneos...</p>
-            </div>
+            <PantallaCarga Mensaje="Cargando torneos..." Alto="85vh" />
         }
         else if (!torneos.Any())
         {
@@ -33,9 +31,21 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Obtiene la lista de torneos desde tu servicio de dominio
+        // 1. Inicia la carga en segundo plano sin congelar la respuesta de la navegación
+        _ = CargarDatosAsync();
+    }
+
+    private async Task CargarDatosAsync()
+    {
+        // 2. Libera el hilo inicial para que Blazor pinte inmediatamente la página con <PantallaCarga />
+        await Task.Yield();
+
+        // 3. Consulta la base de datos
         List<Torneo>? lista = await DomainService.ObtenerTorneosAsync();
-        torneos = lista.Where(t => t.TipoTorneo == Models.Enums.TipoTorneo.Internacional)
-        .ToList();
+        torneos = lista?.Where(t => t.TipoTorneo == Models.Enums.TipoTorneo.Internacional)
+                        .ToList() ?? new List<Torneo>();
+
+        // 4. Notifica a Blazor que los datos terminaron de cargar para sustituir la carga por los torneos
+        StateHasChanged();
     }
 }

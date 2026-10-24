@@ -1,0 +1,262 @@
+/* CSS for MatchDetail component */
+/* CSS for MatchDetail component */
+
+
+
+/* FONDO EMERGENTE Y MODAL */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.match-detail-card {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    background-color: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    animation: popup 0.2s ease-out;
+}
+
+@keyframes popup {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ENCABEZADO SIMÉTRICO */
+.detail-header {
+    display: flex;
+    width: 100%;
+    height: 68px;
+}
+
+.header-team {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    color: #ffffff;
+}
+
+    .header-team.local {
+        background-color: #ff2a3b;
+    }
+
+    .header-team.visitante {
+        background-color: #3b2eff;
+    }
+
+.team-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.team-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+.team-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.score-display {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* CUERPO */
+.detail-body {
+    padding: 20px 24px;
+    overflow-y: hidden;
+}
+
+/* MODO VISTA (3 Columnas con Balón) */
+.goles-grid-view {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    gap: 12px;
+    align-items: start;
+}
+
+.ball-column {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 6px;
+}
+
+.ball-image {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    user-select: none;
+}
+
+.gol-text-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 15px;
+    color: #1e293b;
+}
+
+    .gol-text-row.local {
+        justify-content: flex-end;
+    }
+
+    .gol-text-row.visitante {
+        justify-content: flex-start;
+    }
+
+.gol-jugador {
+    font-weight: 500;
+}
+
+.gol-minuto {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* MODO EDICIÓN (2 Columnas con Cajas) */
+.goles-grid-edit {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.goles-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.gol-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input-smooth {
+    border: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #1e293b;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+    .input-smooth:hover {
+        border-color: #cbd5e1;
+        background-color: #ffffff;
+    }
+
+    .input-smooth:focus {
+        border-color: #94a3b8;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2);
+    }
+
+.input-nombre {
+    flex: 1;
+    min-width: 0;
+}
+
+.input-minuto {
+    width: 55px;
+    text-align: center;
+}
+
+/* PANTALLA DE CARGA LOCALIZADA */
+.modal-loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 10px 0;
+}
+
+    .modal-loading-container ::deep .pantalla-carga-container {
+        min-height: unset !important;
+        height: auto !important;
+        padding: 16px 0 !important;
+    }
+
+/* BOTONES ABAJO A LA DERECHA */
+.actions-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-action-main {
+    background-color: #111111;
+    color: #ffffff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+    .btn-action-main:hover {
+        background-color: #222222;
+    }
+
+.btn-action-secondary {
+    background-color: #e2e8f0;
+    color: #1e293b;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+    .btn-action-secondary:hover {
+        background-color: #cbd5e1;
+    }
+
+    .btn-action-main:active, .btn-action-secondary:active {
+        transform: scale(0.98);
+    }

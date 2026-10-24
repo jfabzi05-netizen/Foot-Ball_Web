@@ -1,6 +1,4 @@
-﻿@using ProyectoWebFutbol.Models.Dominio
-
-<div class="fixture-card-wrapper">
+﻿<div class="fixture-card-wrapper">
     @if (!string.IsNullOrEmpty(TituloJornada))
     {
         <h2 class="fixture-title">@TituloJornada</h2>
@@ -11,7 +9,7 @@
         <div class="fixture-grid-container">
             @foreach (var partido in Partidos)
             {
-                <MatchCard Partido="partido" />
+                <MatchCard Partido="partido" OnPartidoSeleccionado="OnPartidoSeleccionado" />
             }
         </div>
     }
@@ -22,69 +20,3 @@
         </div>
     }
 </div>
-
-<style>
-    /* Contenedor transparente sin cuadro gris/blanco exterior */
-    .fixture-card-wrapper {
-        width: 100%;
-        background-color: transparent;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    /* El título comparte exactamente el alineamiento del borde del primer card */
-    .fixture-title {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        font-size: 24px;
-        font-weight: 700;
-        color: #111111;
-        margin-top: 0;
-        margin-bottom: 24px;
-        text-align: left;
-    }
-
-    .fixture-grid-container {
-        display: grid;
-        /* 2 columnas simétricas con espacio igual */
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-        /* Cada MatchCard toma el 100% de su celda */
-        .fixture-grid-container ::deep .match-card {
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-
-    .fixture-empty-state {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 48px 16px;
-        background-color: #ffffff;
-        border-radius: 12px;
-        border: 1px dashed #d0d0d0;
-        color: #666666;
-        font-family: Inter, sans-serif;
-        font-size: 15px;
-    }
-
-    /* Adaptabilidad a pantallas móviles */
-    @@media screen and (max-width: 850px) {
-        .fixture-grid-container {
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-    }
-</style>
-
-@code {
-    [Parameter]
-    public List<Partido> Partidos { get; set; } = new();
-
-    [Parameter]
-    public string? TituloJornada { get; set; }
-}

@@ -18,7 +18,7 @@
     flex-direction: column;
     justify-content: space-between;
     
-    background-image: url('/public/Home.png');
+    background-image: url('/public/assets/Home.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center top; /* Centra la imagen para que no se corte la cara */
@@ -49,7 +49,7 @@
     justify-content: center; /* Centra el eslogan horizontalmente */
     padding: 434px 40px 31px; /* Añadimos padding lateral para que no toque los bordes */
     box-sizing: border-box;
-    background-image: url('/public/Frame@3x.png'); /* Capa de degradado o textura de Figma */
+    background-image: url('/public/assets/Frame@3x.png'); /* Capa de degradado o textura de Figma */
     background-size: cover;
     background-repeat: no-repeat;
     background-position: top;

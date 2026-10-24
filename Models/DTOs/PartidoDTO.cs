@@ -45,5 +45,8 @@ using ProyectoWebFutbol.Models.Enums;
 
             [ForeignKey("VisitaId")]
             public virtual EquipoDTO Visita { get; set; } = null!;
-        }
+
+        public List<string>? GoleadoresLocal { get; set; } = new();
+        public List<string>? GoleadoresVisita { get; set; } = new();
+    }
     }

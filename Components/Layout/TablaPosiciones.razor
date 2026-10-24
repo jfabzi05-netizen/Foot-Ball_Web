@@ -1,6 +1,4 @@
-﻿@using ProyectoWebFutbol.Models.Dominio
-
-@if (Entradas != null && Entradas.Any())
+﻿@if (Entradas != null && Entradas.Any())
 {
     <div class="tabla-posiciones-card">
         <div class="tabla-responsive">
@@ -83,13 +81,13 @@ else
     public GrupoTorneo Grupo { get; set; } = new();
 
     private List<EntradaPosicion> Entradas = new();
-    private bool cargando = true;
+    //private bool cargando = true;
 
     protected override async Task OnParametersSetAsync()
     {
         if (Grupo != null && Grupo.Jornadas != null)
         {
-            cargando = true;
+            //cargando = true;
             try
             {
                 // Pasa la lista de jornadas del grupo al servicio
@@ -97,7 +95,7 @@ else
             }
             finally
             {
-                cargando = false;
+                //cargando = false;
             }
         }
     }

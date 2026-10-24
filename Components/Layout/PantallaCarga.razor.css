@@ -1,0 +1,44 @@
+/* CSS for PantallaCarga component */
+.pantalla-carga-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px; /* Valor por defecto si no se pasa el parámetro Alto */
+    width: 100%;
+    padding: 32px 16px;
+    box-sizing: border-box;
+}
+
+.pantalla-carga-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.spinner-loader {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #111827; /* Mantiene el tono sobrio del diseño */
+    border-radius: 50%;
+    animation: girar 0.8s linear infinite;
+}
+
+.pantalla-carga-texto {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #4b5563;
+    margin: 0;
+}
+
+@keyframes girar {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

@@ -26,7 +26,7 @@ namespace ProyectoWebFutbol.Servicios
         {
             using var context = await _dbFactory.CreateDbContextAsync();
             var dtos = await context.Torneo.ToListAsync(); 
-            return dtos.Select(MapearTorneo).OrderBy(t=> t.Index).ToList();
+            return dtos.Select(dto => Mappers.MapearTorneo(dto, _storageBaseUrl)).OrderBy(t=> t.Index).ToList();
         }
 
         public async Task<Torneo> ObtenerTorneoPorIdAsync(string id)
@@ -37,7 +37,7 @@ namespace ProyectoWebFutbol.Servicios
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == id) ?? new TorneoDTO();
 
-            var torneo = MapearTorneo(torneodto);
+            var torneo = Mappers.MapearTorneo(torneodto, _storageBaseUrl);
 
             // Agregamos los Include para cargar las entidades de EquipoLocal y EquipoVisita
             var partidosdto = await context.Partido
@@ -47,7 +47,7 @@ namespace ProyectoWebFutbol.Servicios
                 .Where(e => e.TorneoId == id)
                 .ToListAsync();
 
-            return MapearPartidosTorneo(torneo, partidosdto);
+            return Mappers.MapearPartidosTorneo(torneo, partidosdto,_storageBaseUrl);
         }
 
         public async Task ActualizarMarcadorAsync(int partidoId, int? scoreLocal, int? scoreVisita, EstadoPartido estado)
@@ -66,121 +66,21 @@ namespace ProyectoWebFutbol.Servicios
             }
         }
 
-        
-
-        // ==========================================
-        // MÉTODOS PRIVADOS DE MAPEO (Mapping Helper)
-        // ==========================================
-
-        private Torneo MapearTorneo(TorneoDTO dto)
+        public async Task ActualizarGoleadoresPartidoAsync(int partidoId, List<string> goleadoresLocal, List<string> goleadoresVisita)
         {
-            Torneo torneo = new Torneo();
-            torneo.Id = dto.Id;
-            torneo.Nombre = dto.Nombre;
-            torneo.ColorHex = dto.ColorHex ?? "";
-            torneo.UrlImagenLogo = _storageBaseUrl + "torneos/" + dto.Nombre + ".png";
-            torneo.UrlBackground = _storageBaseUrl + "torneos/" + dto.Nombre + "-fondo.png";
-            torneo.TipoTorneo = dto.TipoTorneo;
-            torneo.Index = dto.Index;
-            return torneo;
-        }
+            using var context = await _dbFactory.CreateDbContextAsync();
 
-        private Torneo MapearPartidosTorneo(Torneo torneo, List<PartidoDTO> partidosDto)
-        {
-            if (partidosDto == null || !partidosDto.Any())
+            var partido = await context.Partido.FindAsync(partidoId);
+            if (partido != null)
             {
-                return torneo;
+                partido.GoleadoresLocal = goleadoresLocal;
+                partido.GoleadoresVisita = goleadoresVisita;
+
+                await context.SaveChangesAsync();
             }
-
-            // Agrupación secuencial jerárquica con LINQ
-            torneo.Fases = partidosDto
-                .GroupBy(p => p.FaseTorneo ?? TipoFase.FaseDeLiga)
-                .Select(faseGroup => new FaseTorneo
-                {
-                    TipoFase = faseGroup.Key,
-                    Nombre = ObtenerNombreFase(faseGroup.Key),
-                    Grupos = faseGroup
-                        .GroupBy(p => p.GrupoTorneo ?? TipoGrupo.General)
-                        .Select(grupoGroup => new GrupoTorneo
-                        {
-                            TipoGrupo = grupoGroup.Key,
-                            Nombre = ObtenerNombreGrupo(grupoGroup.Key),
-                            HayTabla = grupoGroup.Key == TipoGrupo.General || grupoGroup.Key.ToString().StartsWith("Grupo"),
-                            Jornadas = grupoGroup
-                                .GroupBy(p => p.JornadaRonda)
-                                .Select(jornadaGroup => new JornadaTorneo
-                                {
-                                    TipoJornada = jornadaGroup.Key,
-                                    Nombre = ObtenerNombreJornada(jornadaGroup.Key),
-                                    Partidos = jornadaGroup.Select(MapearPartido).OrderBy(p => p.Id).ToList()
-                                })
-                                .OrderBy(j => j.TipoJornada) // Mantiene el orden secuencial de jornadas
-                                .ToList()
-                        })
-                        .OrderBy(g => g.TipoGrupo)
-                        .ToList()
-                })
-                .OrderBy(f => f.TipoFase)
-                .ToList();
-
-            return torneo;
         }
 
-        private Partido MapearPartido (PartidoDTO dto)
-        {
-            Partido partido = new Partido();
-            partido.MarcadorLocal.Equipo = MapearEquipo(dto.Local);
-            if (dto.ScoreLocal != null) partido.MarcadorLocal.Score = dto.ScoreLocal;
-            if (dto.PenalesLocal != null) partido.MarcadorLocal.Penales = dto.PenalesLocal;
-
-            partido.MarcadorVisita.Equipo = MapearEquipo(dto.Visita);
-            if (dto.ScoreVisita != null) partido.MarcadorVisita.Score = dto.ScoreVisita;
-            if (dto.PenalesVisita != null) partido.MarcadorVisita.Penales = dto.PenalesVisita;
-
-
-            partido.Id = dto.Id;
-            partido.Estado = dto.Estado;
-
-            return partido;
-        }
-
-        private Equipo MapearEquipo(EquipoDTO dto)
-        {
-            Equipo equipo = new Equipo();
-            equipo.Id = dto.Id;
-            equipo.Nombre = dto.Nombre.ToString();
-            equipo.Pais = dto.Pais;
-            equipo.UrlImagen = _storageBaseUrl + "equipos/" +dto.Pais+"/"+ dto.Id + ".png";
-            return equipo;
-        }
-
-        private string ObtenerNombreFase(TipoFase fase) => fase switch
-        {
-            TipoFase.FaseDeLiga => "Fase de Liga",
-            TipoFase.FaseEliminatoria => "Fase Eliminatoria",
-            TipoFase.FaseDeGrupos => "Fase de Grupos",
-            TipoFase.Apertura => "Apertura",
-            TipoFase.Clausura => "Clausura",
-            _ => fase.ToString()
-        };
-
-        private string ObtenerNombreGrupo(TipoGrupo grupo) => grupo switch
-        {
-            TipoGrupo.General => "General",
-            TipoGrupo.RondaDe16 => "Octavos de Final",
-            TipoGrupo.CuartosDeFinal => "Cuartos de Final",
-            TipoGrupo.Semifinales => "Semifinales",
-            TipoGrupo.TercerPuesto => "Tercer Puesto",
-            TipoGrupo.Final => "Final",
-            _ => grupo.ToString().Replace("Grupo", "Grupo ")
-        };
-
-        private string ObtenerNombreJornada(TipoJornada jornada) => jornada switch
-        {
-            TipoJornada.Ida => "Ida",
-            TipoJornada.Vuelta => "Vuelta",
-            _ => jornada.ToString().Replace("Jornada", "Jornada ")
-        };
+        
 
         public async Task<List<EntradaPosicion>> CalcularTablaPosicionesAsync(List<JornadaTorneo> jornadas)
         {

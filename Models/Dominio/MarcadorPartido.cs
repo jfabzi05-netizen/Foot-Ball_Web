@@ -7,5 +7,6 @@ namespace ProyectoWebFutbol.Models.Dominio
         public Equipo Equipo = new Equipo();
         public int? Score;
         public int? Penales;
+        public List<string>? Goleadores { get; set; } = new();
     }
 }

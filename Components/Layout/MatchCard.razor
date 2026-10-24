@@ -1,6 +1,4 @@
-﻿@inject IDomainService DomainService
-
-@if (Partido != null)
+﻿@if (Partido != null)
 {
     <div class="match-card">
         <!-- Contenido Principal: Equipos, Banderas y Marcadores -->
@@ -11,10 +9,14 @@
                     @if (Partido.MarcadorLocal.Equipo != null)
                     {
                         <img src="@Partido.MarcadorLocal.Equipo.UrlImagen"
+                             onerror="this.onerror=null; this.src='public/assets/logo_not_found.png';"
                              alt="@Partido.MarcadorLocal.Equipo.Nombre"
                              class="team-flag"
                              loading="lazy" />
-                        <span class="team-name">@Partido.MarcadorLocal.Equipo.Nombre</span>
+                        <!-- En MatchCard.razor -->
+                        <span class="team-name" style="cursor: pointer;" @onclick="SeleccionarPartido">
+                            @Partido.MarcadorLocal.Equipo.Nombre
+                        </span>
                     }
                     else
                     {
@@ -42,10 +44,14 @@
                     @if (Partido.MarcadorVisita.Equipo != null)
                     {
                         <img src="@Partido.MarcadorVisita.Equipo.UrlImagen"
+                             onerror="this.onerror=null; this.src='public/assets/logo_not_found.png';"
                              alt="@Partido.MarcadorVisita.Equipo.Nombre"
                              class="team-flag"
                              loading="lazy" />
-                        <span class="team-name">@Partido.MarcadorVisita.Equipo.Nombre</span>
+                        <!-- En MatchCard.razor -->
+                        <span class="team-name" style="cursor: pointer;" @onclick="SeleccionarPartido">
+                            @Partido.MarcadorVisita.Equipo.Nombre
+                        </span>
                     }
                     else
                     {
@@ -78,257 +84,5 @@
             </span>
         </div>
     </div>
-}
-
-<style>
-    .match-card {
-        width: 100%;
-        max-width: 420px;
-        background-color: #ffffff;
-        border: 1px solid #e2e2e2;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        padding: 18px 22px;
-        box-sizing: border-box;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    .match-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-        padding-right: 18px;
-    }
-
-    .match-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .match-team {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-
-    .team-flag {
-        width: 40px;
-        height: 26px;
-        object-fit: contain;
-        border-radius: 2px;
-        background-color: transparent;
-    }
-
-    .team-name {
-        font-size: 15px;
-        font-weight: 400;
-        color: #111111;
-        letter-spacing: -0.2px;
-    }
-
-    .match-scores {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .penalties-score {
-        font-size: 14px;
-        color: #444444;
-        font-weight: 400;
-    }
-
-    /* ESTILO DEL INPUT EDITABLE */
-    .score-input {
-        width: 32px;
-        height: 28px;
-        font-family: inherit;
-        font-size: 17px;
-        font-weight: 700;
-        color: #A0A0A0;
-        text-align: center;
-        border: 1px solid transparent; /* Invisible por defecto */
-        background-color: transparent;
-        border-radius: 6px;
-        outline: none;
-        transition: all 0.2s ease;
-        -moz-appearance: textfield;
-    }
-
-        /* Quita las flechitas de los inputs numéricos */
-        .score-input::-webkit-outer-spin-button,
-        .score-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        /* Al pasar el mouse o hacer click se resalta para indicar que es editable */
-        .score-input:hover {
-            background-color: #f3f3f3;
-            border-color: #d0d0d0;
-            cursor: pointer;
-        }
-
-        .score-input:focus {
-            background-color: #ffffff;
-            border-color: #007aff;
-            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
-            cursor: text;
-        }
-
-        .score-input.winner {
-            color: #000000;
-        }
-
-    .divider {
-        width: 1px;
-        height: 48px;
-        background-color: #e5e5e5;
-    }
-
-    .status-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding-left: 18px;
-        min-width: 50px;
-    }
-
-    .status-text {
-        font-size: 14px;
-        font-weight: 500;
-        color: #222222;
-        letter-spacing: 0.2px;
-    }
-
-        .status-text.live {
-            color: #e53935;
-            font-weight: 700;
-        }
-
-        .status-text.clickable {
-            cursor: pointer;
-            user-select: none;
-            transition: opacity 0.15s ease, transform 0.1s ease;
-        }
-
-            .status-text.clickable:hover {
-                opacity: 0.7;
-            }
-
-            .status-text.clickable:active {
-                transform: scale(0.95);
-            }
-</style>
-
-@code {
-    [Parameter, EditorRequired]
-    public Partido? Partido { get; set; }
-
-    private bool EsGanadorLocal =>
-        (Partido?.MarcadorLocal.Score ?? -1) >= (Partido?.MarcadorVisita.Score ?? -1);
-
-    private bool EsGanadorVisita =>
-        (Partido?.MarcadorVisita.Score ?? -1) >= (Partido?.MarcadorLocal.Score ?? -1);
-
-//EDITAR MARCADORES
-
-    private void CambiarScoreLocal(ChangeEventArgs e)
-    {
-        if (Partido != null)
-        {
-            string? valor = e.Value?.ToString();
-
-            // Si el usuario borra todo el campo (texto vacío), se asigna null
-            if (string.IsNullOrWhiteSpace(valor))
-            {
-                Partido.MarcadorLocal.Score = null;
-            }
-            else if (int.TryParse(valor, out int nuevoScore))
-            {
-                Partido.MarcadorLocal.Score = nuevoScore;
-            }
-        }
-    }
-
-    private void CambiarScoreVisita(ChangeEventArgs e)
-    {
-        if (Partido != null)
-        {
-            string? valor = e.Value?.ToString();
-
-            // Si el usuario borra todo el campo (texto vacío), se asigna null
-            if (string.IsNullOrWhiteSpace(valor))
-            {
-                Partido.MarcadorVisita.Score = null;
-            }
-            else if (int.TryParse(valor, out int nuevoScore))
-            {
-                Partido.MarcadorVisita.Score = nuevoScore;
-            }
-        }
-    }
-
-    private async Task GuardarCambiosAsync()
-    {
-        if (Partido != null)
-        {
-            // Envía el valor (que puede ser un int o null) a la base de datos
-            await DomainService.ActualizarMarcadorAsync(
-                Partido.Id,
-                Partido.MarcadorLocal.Score,
-                Partido.MarcadorVisita.Score,
-                Partido.Estado
-            );
-        }
-    }
-
-    private string ObtenerClaseEstado()
-    {
-        var estado = Partido?.Estado.ToString().ToLower() ?? "";
-        if (estado.Contains("en vivo") || estado == "live") return "live";
-        if (estado.Contains("final") || estado == "ft") return "ft";
-        return "tbd";
-    }
-
-    private string ObtenerTextoEstado()
-    {
-        if (Partido == null || Partido.Estado == null)
-            return "TBD";
-
-        var estado = Partido.Estado.ToString().ToLower();
-
-        if (estado.Contains("final") || estado == "ft") return "FT";
-        if (estado.Contains("en vivo") || estado == "live") return "LIVE";
-
-        return Partido.Estado.ToString().ToUpper();
-    }
-    
-    private async Task RotarEstadoAsync()
-    {
-        if (Partido == null) return;
-
-        // Cambiar usando la propiedad del Enum directamente
-        switch (Partido.Estado)
-        {
-            case EstadoPartido.TBD:
-                Partido.Estado = EstadoPartido.LIVE;
-                break;
-
-            case EstadoPartido.LIVE:
-                Partido.Estado = EstadoPartido.FT;
-                break;
-
-            case EstadoPartido.FT:
-            default:
-                Partido.Estado = EstadoPartido.TBD;
-                break;
-        }
-
-        await GuardarCambiosAsync();
-    }
 
 }

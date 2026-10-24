@@ -1,0 +1,18 @@
+﻿@* Components/Layout/PantallaCarga.razor *@
+
+<div class="pantalla-carga-container" style="@ObtenerEstiloAlto()">
+    <div class="pantalla-carga-card">
+        <div class="spinner-loader"></div>
+        <p class="pantalla-carga-texto">@Mensaje</p>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Mensaje { get; set; } = "Cargando...";
+    [Parameter] public string? Alto { get; set; }
+
+    private string ObtenerEstiloAlto()
+    {
+        return !string.IsNullOrWhiteSpace(Alto) ? $"min-height: {Alto} !important;" : string.Empty;
+    }
+}

@@ -60,12 +60,15 @@
 
             [PgName("General")]
             General,
+            [PgName("PlayOffs")]
+            PlayOffs,
+
 
             [PgName("Ronda de 16")]
-            RondaDe16,
+            Rondade16,
 
             [PgName("Cuartos de Final")]
-            CuartosDeFinal,
+            CuartosdeFinal,
 
             [PgName("Semifinales")]
             Semifinales,
@@ -85,7 +88,10 @@
             [PgName("Vuelta")]
             Vuelta,
 
-            [PgName("Jornada 1")]
+        [PgName("Único")]
+        Único,
+
+        [PgName("Jornada 1")]
             Jornada1,
 
             [PgName("Jornada 2")]

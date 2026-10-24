@@ -4,9 +4,7 @@
 
 @if (cargando)
 {
-    <div class="state-container">
-        <p>Cargando información del torneo...</p>
-    </div>
+    <PantallaCarga Mensaje="Cargando información del torneo..." Alto="85vh" />
 }
 else if (torneo == null)
 {
@@ -17,46 +15,69 @@ else if (torneo == null)
 }
 else
 {
-    @* Se le pasa el objeto 'torneo' al componente PageHeader *@
     <PageHeader Torneo="torneo" />
 
-    <main class="torneo-main-content">
-        <div class="torneo-layout-container">
-            
-            <!-- Panel Lateral de Navegación -->
-            <aside class="nav-sidebar">
-                <TorneoNavegacion Fases="torneo.Fases"
-                                  ColorTorneo="@torneo.ColorHex"
-                                  JornadaSeleccionada="jornadaSeleccionada"
-                                  GrupoSeleccionado="grupoSeleccionado"
-                                  FaseSeleccionada="faseSeleccionada"
-                                  MostrarTabla="mostrarTabla"
-                                  OnJornadaSeleccionada="j => jornadaSeleccionada = j"
-                                  OnGrupoSeleccionado="g => grupoSeleccionado = g"
-                                  OnFaseSeleccionada="f => faseSeleccionada = f"
-                                  OnMostrarTablaChanged="m => mostrarTabla = m" />
-            </aside>
+    if (faseSeleccionada == null)
+    {
+        <PantallaCarga Mensaje="No hay información del torneo..." />
+    }
+    else
+    {
+        <main class="torneo-main-content">
+            <div class="torneo-layout-container">
 
-            <!-- Sección de Fixture / Tabla de Posiciones (Derecha) -->
-            <section class="fixture-section">
-                @if (mostrarTabla && grupoSeleccionado != null)
-                {
-                    <h2 class="section-title">Tabla @grupoSeleccionado.Nombre</h2>
-                    <TablaPosiciones Grupo="@grupoSeleccionado" />
-                }
-                else if (jornadaSeleccionada != null)
-                {
-                    <h2 class="section-title">@jornadaSeleccionada.Nombre</h2>
-                    <Fixture Partidos="@jornadaSeleccionada.Partidos" />
-                }
-                else
-                {
-                    <p class="no-jornada-msg">No hay información registrada para mostrar.</p>
-                }
-            </section>
+                <!-- Panel Lateral de Navegación -->
+                <aside class="nav-sidebar">
+                    <TorneoNavegacion Fases="torneo.Fases"
+                                      ColorTorneo="@torneo.ColorHex"
+                                      JornadaSeleccionada="jornadaSeleccionada"
+                                      GrupoSeleccionado="grupoSeleccionado"
+                                      FaseSeleccionada="faseSeleccionada"
+                                      MostrarTabla="mostrarTabla"
+                                      OnJornadaSeleccionada="j => jornadaSeleccionada = j"
+                                      OnGrupoSeleccionado="g => grupoSeleccionado = g"
+                                      OnFaseSeleccionada="f => faseSeleccionada = f"
+                                      OnMostrarTablaChanged="m => mostrarTabla = m" />
+                </aside>
 
-        </div>
-    </main>
+                <!-- Sección de Fixture / Tabla de Posiciones -->
+                <section class="fixture-section">
+                    @if (mostrarTabla && grupoSeleccionado != null)
+                    {
+                        <h2 class="section-title">Tabla @grupoSeleccionado.Nombre</h2>
+                        <TablaPosiciones Grupo="@grupoSeleccionado" />
+                    }
+                    else if (jornadaSeleccionada != null && grupoSeleccionado != null)
+                    {
+                        if (jornadaSeleccionada.TipoJornada == TipoJornada.Ida ||
+                            jornadaSeleccionada.TipoJornada == TipoJornada.Vuelta ||
+                            jornadaSeleccionada.TipoJornada == TipoJornada.Único)
+                        {
+                            <h2 class="section-title">@grupoSeleccionado.Nombre - @jornadaSeleccionada.Nombre</h2>
+                        }
+                        else
+                        {
+                            <h2 class="section-title">@jornadaSeleccionada.Nombre</h2>
+                        }
+
+                        <!-- Se conecta el evento hacia la función de apertura -->
+                        <Fixture Partidos="@jornadaSeleccionada.Partidos"
+                                 OnPartidoSeleccionado="AbrirDetallePartido" />
+                    }
+                    else
+                    {
+                        <p class="no-jornada-msg">No hay información registrada para mostrar.</p>
+                    }
+
+                    <!-- El Modal/Detalle se renderiza DENTRO del contenedor de la derecha -->
+                    <MatchDetail @bind-Mostrar="mostrarModalDetalle"
+                                 Partido="partidoSeleccionado"
+                                 OnGuardado="StateHasChanged" />
+                </section>
+
+            </div>
+        </main>
+    }
 }
 
 <style>
@@ -89,12 +110,13 @@ else
     }
 
     .nav-sidebar {
-        flex: 0 0 260px; /* Ancho fijo para el menú lateral */
+        flex: 0 0 260px;
         width: 260px;
     }
 
     .fixture-section {
-        flex: 1; /* Ocupa el resto del ancho disponible a la derecha */
+        position: relative; /* Mantiene posicionamiento absoluto/relativo del modal dentro de este contenedor */
+        flex: 1;
         background-color: #ffffff;
         border-radius: 8px;
         padding: 24px;
@@ -118,7 +140,6 @@ else
         font-size: 15px;
     }
 
-    /* Adaptabilidad Móvil */
     @@media (max-width: 768px) {
         .torneo-layout-container {
             flex-direction: column;
@@ -141,6 +162,17 @@ else
     private bool mostrarTabla = false;
     private bool cargando = true;
 
+    // Estado del modal/detalle de goleadores
+    private bool mostrarModalDetalle = false;
+    private Partido? partidoSeleccionado;
+
+    public void AbrirDetallePartido(Partido partido)
+    {
+        partidoSeleccionado = partido;
+        mostrarModalDetalle = true;
+        StateHasChanged();
+    }
+
     protected override async Task OnParametersSetAsync()
     {
         cargando = true;
@@ -148,7 +180,6 @@ else
         {
             torneo = await DomainService.ObtenerTorneoPorIdAsync(TorneoId);
 
-            // Seleccionar por defecto la primera fase, grupo y jornada disponibles
             faseSeleccionada = torneo?.Fases.FirstOrDefault();
             grupoSeleccionado = faseSeleccionada?.Grupos.FirstOrDefault();
             jornadaSeleccionada = grupoSeleccionado?.Jornadas.FirstOrDefault();

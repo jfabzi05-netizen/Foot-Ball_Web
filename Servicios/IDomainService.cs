@@ -10,5 +10,7 @@ namespace ProyectoWebFutbol.Servicios
         Task<Torneo> ObtenerTorneoPorIdAsync(string id);
         Task ActualizarMarcadorAsync(int partidoId, int? scoreLocal, int? scoreVisita, EstadoPartido estado);
         Task<List<EntradaPosicion>> CalcularTablaPosicionesAsync(List<JornadaTorneo> jornadas);
+        Task ActualizarGoleadoresPartidoAsync(int partidoId, List<string> goleadoresLocal, List<string> goleadoresVisita);
+
     }
 }
