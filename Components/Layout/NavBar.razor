@@ -1,4 +1,6 @@
-﻿<header class="header-1">
+﻿@inject NavigationManager NavigationManager
+
+<header class="header-1">
     <div class="company">
         <img class="fifa-wc-1"
              loading="lazy"
@@ -7,17 +9,27 @@
 
         <h3 class="fifa-world-cup">Foot-Ball</h3>
     </div>
-    
+
     <nav class="buttons">
-        <NavLink href="/" Match="NavLinkMatch.All" class="nav-item" ActiveClass="active-btn">
+        <NavLink href="/"
+                 Match="NavLinkMatch.All"
+                 class="nav-item"
+                 ActiveClass="active-btn"
+                 onclick="document.querySelector('.desktop').scrollTop = 0; window.scrollTo(0,0);">
             Inicio
         </NavLink>
-        
-        <NavLink href="/nacionales" class="nav-item" ActiveClass="active-btn">
+
+        <NavLink href="/nacionales"
+                 class="nav-item"
+                 ActiveClass="active-btn"
+                 onclick="document.querySelector('.desktop').scrollTop = 0; window.scrollTo(0,0);">
             Nacional
         </NavLink>
-        
-        <NavLink href="/internacionales" class="nav-item" ActiveClass="active-btn">
+
+        <NavLink href="/internacionales"
+                 class="nav-item"
+                 ActiveClass="active-btn"
+                 onclick="document.querySelector('.desktop').scrollTop = 0; window.scrollTo(0,0);">
             Internacional
         </NavLink>
     </nav>
@@ -26,77 +38,76 @@
 <style>
     /* El contenedor negro del Navbar */
     .header-1 {
-      align-self: stretch;
-      background-color: #000;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 30px; /* Arriba */
-      padding-bottom: 24px; /* Abajo */
-      padding-left: 64px; /* Izquierda */
-      padding-right: 64px; /* Derecha */
-      box-sizing: border-box;
-      top: 0;
-      z-index: 99;
-      position: sticky;
+        align-self: stretch;
+        background-color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 30px; /* Arriba */
+        padding-bottom: 24px; /* Abajo */
+        padding-left: 64px; /* Izquierda */
+        padding-right: 64px; /* Derecha */
+        box-sizing: border-box;
+        top: 0;
+        z-index: 99;
+        position: sticky;
     }
 
     .company {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
 
     .fifa-wc-1 {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
     }
 
     .fifa-world-cup {
-      margin: 0;
-      font-size: 24px;
-      letter-spacing: -0.02em;
-      line-height: 145%;
-      font-weight: 800;
-      color: #fff !important;
-      font-family: 'Inter', sans-serif;
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: -0.02em;
+        line-height: 145%;
+        font-weight: 800;
+        color: #fff !important;
+        font-family: 'Inter', sans-serif;
     }
 
     .buttons {
-      display: flex;
-      align-items: center;
-      gap: 32px;
+        display: flex;
+        align-items: center;
+        gap: 32px;
     }
 
     /* MATAMOS EL AZUL SUBRAYADO Y FORZAMOS BLANCO */
     .header-1 .buttons .nav-item,
     .header-1 .buttons a,
     .header-1 .buttons a:visited {
-      text-decoration: none !important;
-      color: #ffffff !important;
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 145%;
-      padding: 12px 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Inter', sans-serif;
+        text-decoration: none !important;
+        color: #ffffff !important;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 145%;
+        padding: 12px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Inter', sans-serif;
     }
 
-    /* La píldora blanca de Figma cuando la pestaña está activa */
-    .header-1 .buttons .nav-item.active-btn,
-    .header-1 .buttons a.active-btn {
-      background-color: #ffffff !important;
-      color: #000000 !important; /* Letras negras en fondo blanco */
-      border-radius: 12px;
-      font-weight: 500;
-      text-decoration: none !important;
-    }
+        /* La píldora blanca de Figma cuando la pestaña está activa */
+        .header-1 .buttons .nav-item.active-btn,
+        .header-1 .buttons a.active-btn {
+            background-color: #ffffff !important;
+            color: #000000 !important; /* Letras negras en fondo blanco */
+            border-radius: 12px;
+            font-weight: 500;
+            text-decoration: none !important;
+        }
 
-    /* NOTA EL DOBLE ARROBA "@@" PARA QUE BLAZOR NO SE CONFUNDA */
     @@media screen and (max-width: 700px) {
         .header-1 {
             flex-direction: column;

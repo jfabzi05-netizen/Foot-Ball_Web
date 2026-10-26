@@ -1,5 +1,6 @@
 ﻿@* Components/Layout/TorneoCard.razor *@
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 @if (Torneo != null)
 {
@@ -39,6 +40,23 @@
 
     private async Task NavegarAlDetalle()
     {
+        // 1. Resetea el scroll de .desktop y window inmediatamente al pulsar el botón
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                const desktopEl = document.querySelector('.desktop');
+                if (desktopEl) {
+                    desktopEl.scrollTop = 0;
+                }
+                window.scrollTo(0, 0);
+            ");
+        }
+        catch
+        {
+            // Ignorar excepción si el componente se desmonta rápido
+        }
+
+        // 2. Ejecuta la navegación
         if (Torneo != null && !string.IsNullOrWhiteSpace(Torneo.Id))
         {
             if (OnClick.HasDelegate)

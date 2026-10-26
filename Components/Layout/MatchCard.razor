@@ -1,88 +1,98 @@
 ﻿@if (Partido != null)
 {
-    <div class="match-card">
-        <!-- Contenido Principal: Equipos, Banderas y Marcadores -->
-        <div class="match-content">
-            <!-- Equipo Local -->
-            <div class="match-row">
-                <div class="match-team">
-                    @if (Partido.MarcadorLocal.Equipo != null)
-                    {
-                        <img src="@Partido.MarcadorLocal.Equipo.UrlImagen"
-                             onerror="this.onerror=null; this.src='public/assets/logo_not_found.png';"
-                             alt="@Partido.MarcadorLocal.Equipo.Nombre"
-                             class="team-flag"
-                             loading="lazy" />
-                        <!-- En MatchCard.razor -->
-                        <span class="team-name" style="cursor: pointer;" @onclick="SeleccionarPartido">
-                            @Partido.MarcadorLocal.Equipo.Nombre
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="team-name">Por definir</span>
-                    }
+    <div class="match-card-wrapper">
+        <div class="match-card @(EsJornadaVuelta && ResultadoGlobal != null ? "has-footer" : "")">
+            <!-- Contenido Principal: Equipos, Banderas y Marcadores -->
+            <div class="match-content">
+                <!-- Equipo Local -->
+                <div class="match-row">
+                    <div class="match-team">
+                        @if (Partido.MarcadorLocal.Equipo != null)
+                        {
+                            <img src="@Partido.MarcadorLocal.Equipo.UrlImagen"
+                                 onerror="this.onerror=null; this.src='public/assets/logo_not_found.png';"
+                                 alt="@Partido.MarcadorLocal.Equipo.Nombre"
+                                 class="team-flag"
+                                 loading="lazy" />
+                            <span class="team-name" style="cursor: pointer;" @onclick="SeleccionarPartido">
+                                @Partido.MarcadorLocal.Equipo.Nombre
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="team-name">Por definir</span>
+                        }
+                    </div>
+                    <div class="match-scores">
+                        @if (Partido.MarcadorLocal.Penales.HasValue)
+                        {
+                            <span class="penalties-score">(@Partido.MarcadorLocal.Penales)</span>
+                        }
+                        <input type="number"
+                               class="score-input @(EsGanadorLocal ? "winner" : "")"
+                               value="@Partido.MarcadorLocal.Score"
+                               @onchange="(e) => CambiarScoreLocal(e)"
+                               @onblur="GuardarCambiosAsync"
+                               min="0" />
+                    </div>
                 </div>
-                <div class="match-scores">
-                    @if (Partido.MarcadorLocal.Penales.HasValue)
-                    {
-                        <span class="penalties-score">(@Partido.MarcadorLocal.Penales)</span>
-                    }
-                    <!-- Input editable para el Local -->
-                    <input type="number"
-                           class="score-input @(EsGanadorLocal ? "winner" : "")"
-                           value="@Partido.MarcadorLocal.Score"
-                           @onchange="(e) => CambiarScoreLocal(e)"
-                           @onblur="GuardarCambiosAsync"
-                           min="0" />
+
+                <!-- Equipo Visitante -->
+                <div class="match-row">
+                    <div class="match-team">
+                        @if (Partido.MarcadorVisita.Equipo != null)
+                        {
+                            <img src="@Partido.MarcadorVisita.Equipo.UrlImagen"
+                                 onerror="this.onerror=null; this.src='public/assets/logo_not_found.png';"
+                                 alt="@Partido.MarcadorVisita.Equipo.Nombre"
+                                 class="team-flag"
+                                 loading="lazy" />
+                            <span class="team-name" style="cursor: pointer;" @onclick="SeleccionarPartido">
+                                @Partido.MarcadorVisita.Equipo.Nombre
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="team-name">Por definir</span>
+                        }
+                    </div>
+                    <div class="match-scores">
+                        @if (Partido.MarcadorVisita.Penales.HasValue)
+                        {
+                            <span class="penalties-score">(@Partido.MarcadorVisita.Penales)</span>
+                        }
+                        <input type="number"
+                               class="score-input @(EsGanadorVisita ? "winner" : "")"
+                               value="@Partido.MarcadorVisita.Score"
+                               @onchange="(e) => CambiarScoreVisita(e)"
+                               @onblur="GuardarCambiosAsync"
+                               min="0" />
+                    </div>
                 </div>
             </div>
 
-            <!-- Equipo Visitante -->
-            <div class="match-row">
-                <div class="match-team">
-                    @if (Partido.MarcadorVisita.Equipo != null)
-                    {
-                        <img src="@Partido.MarcadorVisita.Equipo.UrlImagen"
-                             onerror="this.onerror=null; this.src='public/assets/logo_not_found.png';"
-                             alt="@Partido.MarcadorVisita.Equipo.Nombre"
-                             class="team-flag"
-                             loading="lazy" />
-                        <!-- En MatchCard.razor -->
-                        <span class="team-name" style="cursor: pointer;" @onclick="SeleccionarPartido">
-                            @Partido.MarcadorVisita.Equipo.Nombre
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="team-name">Por definir</span>
-                    }
-                </div>
-                <div class="match-scores">
-                    @if (Partido.MarcadorVisita.Penales.HasValue)
-                    {
-                        <span class="penalties-score">(@Partido.MarcadorVisita.Penales)</span>
-                    }
-                    <!-- Input editable para el Visitante -->
-                    <input type="number"
-                           class="score-input @(EsGanadorVisita ? "winner" : "")"
-                           value="@Partido.MarcadorVisita.Score"
-                           @onchange="(e) => CambiarScoreVisita(e)"
-                           @onblur="GuardarCambiosAsync"
-                           min="0" />
-                </div>
+            <!-- Línea Vertical Separadora -->
+            <div class="divider"></div>
+
+            <!-- Estado del Partido (FT, TBD, LIVE) -->
+            <div class="status-container">
+                <span class="status-text clickable @ObtenerClaseEstado()" @onclick="RotarEstadoAsync">
+                    @ObtenerTextoEstado()
+                </span>
             </div>
         </div>
 
-        <!-- Línea Vertical Separadora -->
-        <div class="divider"></div>
+        <!-- Franja del Global ubicada DEBAJO de la tarjeta -->
+        @if (EsJornadaVuelta && ResultadoGlobal != null)
+        {
+            bool esLocalEnGlobal = ResultadoGlobal.GlobalLocal?.Equipo?.Nombre == Partido.MarcadorLocal?.Equipo?.Nombre;
+            int golesLocal = esLocalEnGlobal ? (ResultadoGlobal.GlobalLocal?.Score ?? 0) : (ResultadoGlobal.GlobalVisita?.Score ?? 0);
+            int golesVisita = esLocalEnGlobal ? (ResultadoGlobal.GlobalVisita?.Score ?? 0) : (ResultadoGlobal.GlobalLocal?.Score ?? 0);
 
-        <!-- Estado del Partido (FT, TBD, LIVE) -->
-        <div class="status-container">
-            <span class="status-text clickable @ObtenerClaseEstado()" @onclick="RotarEstadoAsync">
-                @ObtenerTextoEstado()
-            </span>
-        </div>
+            <div class="match-global-footer">
+                <span class="global-label">GLOBAL</span>
+                <span class="global-score">@golesLocal - @golesVisita</span>
+            </div>
+        }
     </div>
-
 }

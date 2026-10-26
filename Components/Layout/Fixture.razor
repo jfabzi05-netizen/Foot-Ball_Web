@@ -9,7 +9,10 @@
         <div class="fixture-grid-container">
             @foreach (var partido in Partidos)
             {
-                <MatchCard Partido="partido" OnPartidoSeleccionado="OnPartidoSeleccionado" />
+                <MatchCard Partido="partido"
+                           Jornada="Jornada"
+                           ResultadoGlobal="ObtenerGlobalParaPartido(partido)"
+                           OnPartidoSeleccionado="OnPartidoSeleccionado" />
             }
         </div>
     }

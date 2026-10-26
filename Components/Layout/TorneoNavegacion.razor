@@ -5,7 +5,7 @@
     {
         @foreach (var fase in Fases)
         {
-            <!-- Título de la Fase (Ej: Fase de Grupos / Fase de Liga) -->
+            <!-- Título de la Fase (Ej: Fase de Grupos / Apertura / Clausura) -->
             <div class="nav-fase-header">
                 @fase.Nombre
             </div>
@@ -13,11 +13,13 @@
             @foreach (var grupo in fase.Grupos)
             {
                 bool esTablaActiva = MostrarTabla && GrupoSeleccionado == grupo;
-                bool estaColapsado = gruposColapsados.Contains(grupo);
+                // Está desplegado SOLO si es el grupo guardado en la variable activa
+                bool estaDesplegado = grupoDesplegado == grupo;
+                bool estaColapsado = !estaDesplegado;
 
                 <!-- Título del Grupo con opción de desplegar/contraer -->
                 <div class="nav-grupo-header" style="background-color: @ColorTorneo;">
-                    <!-- Clic en el nombre para contraer/desplegar -->
+                    <!-- Clic en el nombre para desplegar este grupo y cerrar los demás -->
                     <div class="grupo-title-container" @onclick="() => ToggleGrupo(grupo)">
                         <button type="button" class="btn-chevron" title="@(estaColapsado ? "Desplegar" : "Contraer")">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="@(estaColapsado ? "chevron-collapsed" : "")">
@@ -45,8 +47,8 @@
                     }
                 </div>
 
-                <!-- Lista de Jornadas (Solo se muestra si NO está colapsado) -->
-                @if (!estaColapsado)
+                <!-- Lista de Jornadas (Solo se muestra si está desplegado) -->
+                @if (estaDesplegado)
                 {
                     <div class="nav-jornadas-list">
                         @foreach (var jornada in grupo.Jornadas)
@@ -78,23 +80,41 @@
     [Parameter] public EventCallback<FaseTorneo> OnFaseSeleccionada { get; set; }
     [Parameter] public EventCallback<bool> OnMostrarTablaChanged { get; set; }
 
-    // Estado local para mantener los grupos colapsados
-    private HashSet<GrupoTorneo> gruposColapsados = new();
+    // Almacena ÚNICAMENTE el grupo que se encuentra expandido
+    private GrupoTorneo? grupoDesplegado;
+
+    protected override void OnParametersSet()
+    {
+        // Si hay un grupo seleccionado externamente, asegurar que sea el desplegado
+        if (GrupoSeleccionado != null)
+        {
+            grupoDesplegado = GrupoSeleccionado;
+        }
+        else if (grupoDesplegado == null && Fases.Any() && Fases.First().Grupos.Any())
+        {
+            // Por defecto abre el primer grupo si no hay selección activa
+            grupoDesplegado = Fases.First().Grupos.First();
+        }
+    }
 
     private void ToggleGrupo(GrupoTorneo grupo)
     {
-        if (gruposColapsados.Contains(grupo))
+        // Si presiona el que ya está abierto, se colapsa (queda null).
+        // Si presiona uno diferente, se asigna como el nuevo abierto y cierra automáticamente el anterior.
+        if (grupoDesplegado == grupo)
         {
-            gruposColapsados.Remove(grupo);
+            grupoDesplegado = null;
         }
         else
         {
-            gruposColapsados.Add(grupo);
+            grupoDesplegado = grupo;
         }
     }
 
     private async Task SeleccionarJornada(JornadaTorneo jornada, GrupoTorneo grupo, FaseTorneo fase)
     {
+        grupoDesplegado = grupo;
+
         if (FaseSeleccionada != fase)
         {
             FaseSeleccionada = fase;
@@ -122,6 +142,8 @@
 
     private async Task SeleccionarTabla(GrupoTorneo grupo, FaseTorneo fase)
     {
+        grupoDesplegado = grupo;
+
         if (FaseSeleccionada != fase)
         {
             FaseSeleccionada = fase;
@@ -147,141 +169,3 @@
         }
     }
 }
-
-<style>
-    .torneo-nav-container {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        font-family: Inter, sans-serif;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border-radius: 6px;
-        overflow: hidden;
-        background-color: #ffffff;
-    }
-
-    .nav-fase-header {
-        background-color: #000000;
-        color: #ffffff;
-        font-weight: 700;
-        padding: 12px 16px;
-        font-size: 15px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .nav-grupo-header {
-        color: #ffffff;
-        font-weight: 600;
-        padding: 10px 16px;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        user-select: none;
-    }
-
-    .grupo-title-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        flex: 1;
-    }
-
-    .btn-chevron {
-        background: transparent;
-        border: none;
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        cursor: pointer;
-    }
-
-        .btn-chevron svg {
-            transition: transform 0.2s ease;
-        }
-
-            .btn-chevron svg.chevron-collapsed {
-                transform: rotate(-90deg);
-            }
-
-    /* Estilo del botón del icono de tabla */
-    .btn-tabla {
-        background: transparent;
-        border: none;
-        color: rgba(255, 255, 255, 0.85);
-        cursor: pointer;
-        padding: 4px 6px;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-    }
-
-        .btn-tabla:hover {
-            background-color: rgba(255, 255, 255, 0.25);
-            color: #ffffff;
-        }
-
-        .btn-tabla.active {
-            background-color: #ffffff;
-            color: #000000;
-        }
-
-    /* Lista de Jornadas/Rondas */
-    .nav-jornadas-list {
-        display: flex;
-        flex-direction: column;
-        background-color: #f9f9f9;
-        max-height: 320px;
-        overflow-y: auto;
-    }
-
-        .nav-jornadas-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .nav-jornadas-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        .nav-jornadas-list::-webkit-scrollbar-thumb {
-            background: #cccccc;
-            border-radius: 3px;
-        }
-
-            .nav-jornadas-list::-webkit-scrollbar-thumb:hover {
-                background: #aaaaaa;
-            }
-
-    .nav-jornada-item {
-        border: none;
-        background: transparent;
-        text-align: left;
-        padding: 11px 18px;
-        font-weight: 500;
-        font-size: 14px;
-        color: #333333;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        width: 100%;
-        border-left: 4px solid transparent;
-        box-sizing: border-box;
-    }
-
-        .nav-jornada-item:hover {
-            background-color: #ececec;
-            color: #000000;
-        }
-
-        .nav-jornada-item.active {
-            background-color: #e2e2e2;
-            color: #000000;
-            font-weight: 700;
-            border-left-color: #000000;
-        }
-</style>

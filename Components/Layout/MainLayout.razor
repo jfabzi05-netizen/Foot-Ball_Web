@@ -1,4 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <div class="desktop">
     <NavBar />
@@ -11,34 +14,72 @@
 </div>
 
 <style>
-    /* 1. Limpiamos cualquier comportamiento extraño del navegador */
     html, body {
         margin: 0;
         padding: 0;
         height: 100%;
     }
 
-    /* 2. Tu contenedor principal */
     .desktop {
         display: flex;
         flex-direction: column;
-        /* 👇 LA SOLUCIÓN 👇 */
-        height: 100%; /* Cambiado de min-height a height */
-        overflow-y: auto; /* El scroll ahora lo maneja el layout, no la ventana entera */
-        
+        height: 100%;
+        overflow-y: auto;
         background-color: #fafafa;
     }
 
     .main-content {
-        flex: 1 0 auto; /* Asegura que el contenido crezca pero no colapse */
+        flex: 1 0 auto;
         display: flex;
         flex-direction: column;
     }
 
-    /* 👇 AGREGA ESTE BLOQUE EXACTO EN TU MAINLAYOUT 👇 */
     footer, .sponsors {
-        flex-shrink: 0 !important; /* Prohíbe al layout encoger el footer */
-        flex-grow: 0 !important; /* Prohíbe al layout estirar el footer */
+        flex-shrink: 0 !important;
+        flex-grow: 0 !important;
         align-self: stretch !important;
     }
 </style>
+
+@code {
+    private bool _requiereScrollArriba = false;
+
+    protected override void OnInitialized()
+    {
+        // Se suscribe al evento cuando la URL o la ruta cambian
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        // Marcamos la bandera para reiniciar el scroll en el siguiente renderizado completo
+        _requiereScrollArriba = true;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Si es la primera carga o la ruta acaba de cambiar
+        if (firstRender || _requiereScrollArriba)
+        {
+            _requiereScrollArriba = false;
+
+            // Espera un tick mínimo (20ms) para que Blazor termine de inyectar el DOM de @Body
+            await Task.Delay(20);
+
+            // Resetea el scroll del contenedor .desktop y de la ventana global
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                window.scrollTo(0, 0);
+                const desktopEl = document.querySelector('.desktop');
+                if (desktopEl) {
+                    desktopEl.scrollTop = 0;
+                }
+            ");
+        }
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

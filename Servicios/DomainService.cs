@@ -79,9 +79,6 @@ namespace ProyectoWebFutbol.Servicios
                 await context.SaveChangesAsync();
             }
         }
-
-        
-
         public async Task<List<EntradaPosicion>> CalcularTablaPosicionesAsync(List<JornadaTorneo> jornadas)
         {
             if (jornadas == null || !jornadas.Any())
@@ -193,5 +190,93 @@ namespace ProyectoWebFutbol.Servicios
 
             return await Task.FromResult(tablaOrdenada);
         }
+
+        public async Task<List<ResultadoGlobal>> CalcularGlobalLllavesAsync(List<JornadaTorneo> jornadas)
+        {
+            if (jornadas == null || !jornadas.Any())
+                return new List<ResultadoGlobal>();
+
+            return await Task.Run(() =>
+            {
+                // 1. Filtrar partidos válidos para evitar NullReferenceException
+                var todosLosPartidos = jornadas
+                    .Where(j => j.Partidos != null)
+                    .SelectMany(j => j.Partidos)
+                    .Where(p => p.MarcadorLocal?.Equipo != null && p.MarcadorVisita?.Equipo != null)
+                    .ToList();
+
+                // 2. Agrupar convirtiendo nombres a mayúsculas y eliminando espacios innecesarios
+                var partidosPorEnfrentamiento = todosLosPartidos
+                    .GroupBy(p =>
+                    {
+                        var nombre1 = p.MarcadorLocal.Equipo.Nombre.Trim().ToUpper();
+                        var nombre2 = p.MarcadorVisita.Equipo.Nombre.Trim().ToUpper();
+                        var ordenados = new[] { nombre1, nombre2 }.OrderBy(n => n).ToList();
+
+                        return $"{ordenados[0]}_VS_{ordenados[1]}";
+                    });
+
+                var resultadosGlobales = new List<ResultadoGlobal>();
+
+                foreach (var grupoEnfrentamiento in partidosPorEnfrentamiento)
+                {
+                    var partidosDeSerie = grupoEnfrentamiento.ToList();
+                    if (!partidosDeSerie.Any()) continue;
+
+                    // Tomar el primer encuentro como referencia inicial de los dos equipos
+                    var primerPartido = partidosDeSerie.First();
+                    var equipoA = primerPartido.MarcadorLocal.Equipo;
+                    var equipoB = primerPartido.MarcadorVisita.Equipo;
+
+                    // Identificador único (Id si existe, sino el Nombre limpio)
+                    var idEquipoA = !string.IsNullOrEmpty(equipoA.Id)
+                        ? equipoA.Id
+                        : equipoA.Nombre.Trim().ToUpper();
+
+                    int golesEquipoA = 0;
+                    int golesEquipoB = 0;
+
+                    // 3. Iterar y sumar TODOS los partidos del cruce sin fallar por referencias de objetos
+                    foreach (var partido in partidosDeSerie)
+                    {
+                        var idLocalActual = !string.IsNullOrEmpty(partido.MarcadorLocal.Equipo.Id)
+                            ? partido.MarcadorLocal.Equipo.Id
+                            : partido.MarcadorLocal.Equipo.Nombre.Trim().ToUpper();
+
+                        // COMPARACIÓN POR VALOR (ID O NOMBRE)
+                        if (idLocalActual == idEquipoA)
+                        {
+                            golesEquipoA += partido.MarcadorLocal.Score ?? 0;
+                            golesEquipoB += partido.MarcadorVisita.Score ?? 0;
+
+                        }
+                        else
+                        {
+                            golesEquipoA += partido.MarcadorVisita.Score ?? 0;
+                            golesEquipoB += partido.MarcadorLocal.Score ?? 0;
+
+                        }
+                    }
+
+                    // 4. Retornar el global acumulado de ambos encuentros
+                    resultadosGlobales.Add(new ResultadoGlobal
+                    {
+                        GlobalLocal = new MarcadorPartido
+                        {
+                            Equipo = equipoA,
+                            Score = golesEquipoA,
+                        },
+                        GlobalVisita = new MarcadorPartido
+                        {
+                            Equipo = equipoB,
+                            Score = golesEquipoB,
+                        }
+                    });
+                }
+
+                return resultadosGlobales;
+            });
+        }
+
     }
 }

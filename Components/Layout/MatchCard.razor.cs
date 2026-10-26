@@ -10,6 +10,19 @@ namespace ProyectoWebFutbol.Components.Layout
         [Parameter, EditorRequired]
         public Partido? Partido { get; set; }
 
+
+        // Recibimos la jornada actual para evaluar si es de tipo 'Vuelta'
+        [Parameter]
+        public JornadaTorneo? Jornada { get; set; }
+
+        // Recibimos opcionalmente el resultado global calculado para este cruce
+        [Parameter]
+        public ResultadoGlobal? ResultadoGlobal { get; set; }
+
+        // Evalúa si la jornada es de tipo "Vuelta"
+        private bool EsJornadaVuelta =>
+            Jornada?.TipoJornada == TipoJornada.Vuelta;
+
         private bool EsGanadorLocal =>
             (Partido?.MarcadorLocal.Score ?? -1) >= (Partido?.MarcadorVisita.Score ?? -1);
 

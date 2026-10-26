@@ -35,7 +35,7 @@ else
                                       FaseSeleccionada="faseSeleccionada"
                                       MostrarTabla="mostrarTabla"
                                       OnJornadaSeleccionada="j => jornadaSeleccionada = j"
-                                      OnGrupoSeleccionado="g => grupoSeleccionado = g"
+                                      OnGrupoSeleccionado="async g => { grupoSeleccionado = g; await RecalcularGlobalesAsync(); }"
                                       OnFaseSeleccionada="f => faseSeleccionada = f"
                                       OnMostrarTablaChanged="m => mostrarTabla = m" />
                 </aside>
@@ -62,6 +62,8 @@ else
 
                         <!-- Se conecta el evento hacia la función de apertura -->
                         <Fixture Partidos="@jornadaSeleccionada.Partidos"
+                                 Jornada="@jornadaSeleccionada"
+                                 ResultadosGlobales="@resultadosGlobales"
                                  OnPartidoSeleccionado="AbrirDetallePartido" />
                     }
                     else
@@ -184,10 +186,26 @@ else
             grupoSeleccionado = faseSeleccionada?.Grupos.FirstOrDefault();
             jornadaSeleccionada = grupoSeleccionado?.Jornadas.FirstOrDefault();
             mostrarTabla = false;
+
+            await RecalcularGlobalesAsync();
         }
         finally
         {
             cargando = false;
+        }
+    }
+
+    private List<ResultadoGlobal> resultadosGlobales = new();
+
+    private async Task RecalcularGlobalesAsync()
+    {
+        if (grupoSeleccionado != null && grupoSeleccionado.Jornadas != null)
+        {
+            resultadosGlobales = await DomainService.CalcularGlobalLllavesAsync(grupoSeleccionado.Jornadas);
+        }
+        else
+        {
+            resultadosGlobales.Clear();
         }
     }
 }
