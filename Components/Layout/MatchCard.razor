@@ -1,7 +1,9 @@
 ﻿@if (Partido != null)
 {
+    bool mostrarFooterGlobal = EsJornadaVuelta && ResultadoGlobal != null;
+
     <div class="match-card-wrapper">
-        <div class="match-card @(EsJornadaVuelta && ResultadoGlobal != null ? "has-footer" : "")">
+        <div class="match-card @(mostrarFooterGlobal ? "has-footer" : "")">
             <!-- Contenido Principal: Equipos, Banderas y Marcadores -->
             <div class="match-content">
                 <!-- Equipo Local -->
@@ -82,16 +84,23 @@
             </div>
         </div>
 
-        <!-- Franja del Global ubicada DEBAJO de la tarjeta -->
-        @if (EsJornadaVuelta && ResultadoGlobal != null)
+        <!-- Franja del Global (Solo si aplica) -->
+        @if (mostrarFooterGlobal)
         {
-            bool esLocalEnGlobal = ResultadoGlobal.GlobalLocal?.Equipo?.Nombre == Partido.MarcadorLocal?.Equipo?.Nombre;
+            bool esLocalEnGlobal = ResultadoGlobal!.GlobalLocal?.Equipo?.Nombre == Partido.MarcadorLocal?.Equipo?.Nombre;
             int golesLocal = esLocalEnGlobal ? (ResultadoGlobal.GlobalLocal?.Score ?? 0) : (ResultadoGlobal.GlobalVisita?.Score ?? 0);
             int golesVisita = esLocalEnGlobal ? (ResultadoGlobal.GlobalVisita?.Score ?? 0) : (ResultadoGlobal.GlobalLocal?.Score ?? 0);
 
             <div class="match-global-footer">
                 <span class="global-label">GLOBAL</span>
                 <span class="global-score">@golesLocal - @golesVisita</span>
+                @if (ResultadoGlobal.GlobalLocal?.Penales != null || ResultadoGlobal.GlobalVisita?.Penales != null)
+                {
+                    int penLocal = esLocalEnGlobal ? (ResultadoGlobal.GlobalLocal?.Penales ?? 0) : (ResultadoGlobal.GlobalVisita?.Penales ?? 0);
+                    int penVisita = esLocalEnGlobal ? (ResultadoGlobal.GlobalVisita?.Penales ?? 0) : (ResultadoGlobal.GlobalLocal?.Penales ?? 0);
+
+                    <span class="global-penalties">(pen. @penLocal-@penVisita)</span>
+                }
             </div>
         }
     </div>

@@ -1,7 +1,14 @@
-/* CSS for MatchCard component */
-.match-card {
+/* Contenedor general vertical */
+.match-card-wrapper {
     width: 100%;
     max-width: 420px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Tarjeta principal */
+.match-card {
+    width: 100%;
     background-color: #ffffff;
     border: 1px solid #e2e2e2;
     border-radius: 20px;
@@ -12,6 +19,13 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+    /* Quita las esquinas inferiores solo si hay un footer global debajo */
+    .match-card.has-footer {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+/* Contenido de equipos y scores */
 .match-content {
     flex: 1;
     display: flex;
@@ -59,7 +73,7 @@
     font-weight: 400;
 }
 
-/* ESTILO DEL INPUT EDITABLE */
+/* Input editable para los goles */
 .score-input {
     width: 32px;
     height: 28px;
@@ -68,7 +82,7 @@
     font-weight: 700;
     color: #A0A0A0;
     text-align: center;
-    border: 1px solid transparent; /* Invisible por defecto */
+    border: 1px solid transparent;
     background-color: transparent;
     border-radius: 6px;
     outline: none;
@@ -76,14 +90,12 @@
     -moz-appearance: textfield;
 }
 
-    /* Quita las flechitas de los inputs numéricos */
     .score-input::-webkit-outer-spin-button,
     .score-input::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
 
-    /* Al pasar el mouse o hacer click se resalta para indicar que es editable */
     .score-input:hover {
         background-color: #f3f3f3;
         border-color: #d0d0d0;
@@ -101,12 +113,14 @@
         color: #000000;
     }
 
+/* Divisor vertical */
 .divider {
     width: 1px;
     height: 48px;
     background-color: #e5e5e5;
 }
 
+/* Contenedor del estado (FT, LIVE, TBD) */
 .status-container {
     display: flex;
     align-items: center;
@@ -141,27 +155,15 @@
             transform: scale(0.95);
         }
 
-.match-card-wrapper {
-    width: 100%;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-}
-
-    /* Reducimos ligeramente el border-radius inferior cuando hay apartado de global */
-    .match-card-wrapper .match-card {
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-
+/* Footer del marcador global */
 .match-global-footer {
     width: 100%;
     background-color: #f4f4f5;
     border: 1px solid #e2e2e2;
     border-top: none;
-    border-bottom-left-radius: 16px;
-    border-bottom-right-radius: 16px;
-    padding: 6px 16px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    padding: 8px 16px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
